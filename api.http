@@ -1,0 +1,2 @@
+### HEALTH CHECK
+GET http://localhost:3001/health
