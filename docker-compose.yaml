@@ -1,0 +1,10 @@
+version: "3.9"
+services:
+  collagegram-db:
+    image: postgres:latest
+    container_name: ${DATABASE_CONTAINER_NAME}
+    environment:
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      - "5432:5432"
+    restart: unless-stopped

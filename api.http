@@ -1,2 +1,21 @@
 ### HEALTH CHECK
 GET http://localhost:3001/health
+
+### REGISTER USER
+POST http://localhost:3001/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "test-user",
+  "password": "test12345",
+  "email": "test@user.com"
+}
+
+### LOGIN USER
+POST http://localhost:3001/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "amirns",
+  "password": "amir1995@!"
+}

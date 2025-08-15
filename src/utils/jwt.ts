@@ -1,21 +1,25 @@
-import {SignJWT} from "jose";
+import {type JWTPayload, SignJWT} from "jose";
 import {createSecretKey} from "node:crypto";
-import env from "../../env.js"
+import env from "../../env.ts"
 
-export interface JwtPayload {
+export interface JwtPayload extends JWTPayload {
     id: string;
     email: string;
     username: string;
 }
 
 
-export const generateJwtToken = (payload: JwtPayload) => {
-    const secret = env.JWT_SECRET
-    const secretKey = createSecretKey(secret, "utf-8")
+export const generateJwtToken = async (payload: JwtPayload): Promise<string> => {
+    const secret = process.env.JWT_SECRET
+    if (!secret) {
+        throw new Error('JWT_SECRET environment variable is not set')
+    }
 
-    return new SignJWT()
-        .setProtectedHeader({alg: "HS256"})
+
+    const secretKey = createSecretKey(secret, "utf-8")
+    return await new SignJWT(payload)
+        .setProtectedHeader({alg: 'HS256'})
         .setIssuedAt()
-        .setExpirationTime(env.JWT_EXPIRES_IN || '24h')
+        .setExpirationTime(env.JWT_EXPIRES_IN || '7d')
         .sign(secretKey)
 }
