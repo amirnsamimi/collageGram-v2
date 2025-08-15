@@ -16,6 +16,6 @@ export const generateJwtToken = (payload: JwtPayload) => {
     return new SignJWT()
         .setProtectedHeader({alg: "HS256"})
         .setIssuedAt()
-        .setExpirationTime(env.JWT_EXPIRES_IN)
+        .setExpirationTime(env.JWT_EXPIRES_IN || '24h')
         .sign(secretKey)
 }
