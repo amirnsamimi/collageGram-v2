@@ -25,11 +25,14 @@ const envSchema = z.object({
 
     BCRYPT_ROUNDS: z.coerce.number().default(12),
     JWT_SECRET: z.string().default('secret'),
-    JWT_EXPIRES_IN: z.string().default('24h'),
+    JWT_EXPIRES_IN: z.string().default('30m'),
+    SESSION_EXPIRES_IN: z.string().default('6h'),
+    REFRESH_EXPIRES_IN: z.string().default('7d'),
 
     DATABASE_URL: z.string().startsWith('postgresql://'),
     DATABASE_POOL_MIN: z.coerce.number().default(2),
-    DATABASE_POOL_MAX: z.coerce.number().default(20)
+    DATABASE_POOL_MAX: z.coerce.number().default(20),
+    REDIS_URL: z.string().startsWith('redis://')
 })
 
 export type Env = z.infer<typeof envSchema>
