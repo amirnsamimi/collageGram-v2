@@ -21,7 +21,15 @@ if (isDevelopment) {
 const envSchema = z.object({
     NODE_ENV: z.enum(['production', 'development', 'test']).default('development'),
     APP_STAGE: z.enum(['dev', 'production', 'test']).default('dev'),
-    PORT: z.coerce.number().positive().default(3001)
+    PORT: z.coerce.number().positive().default(3001),
+
+    BCRYPT_ROUNDS: z.coerce.number().default(12),
+    JWT_SECRET: z.string().default('secret'),
+    JWT_EXPIRES_IN: z.string().default('24h'),
+
+    DATABASE_URL: z.string().startsWith('postgresql://'),
+    DATABASE_POOL_MIN: z.coerce.number().default(2),
+    DATABASE_POOL_MAX: z.coerce.number().default(20)
 })
 
 export type Env = z.infer<typeof envSchema>
