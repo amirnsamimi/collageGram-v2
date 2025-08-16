@@ -5,49 +5,27 @@ import {type selectUser, users} from "../db/schema.ts";
 import type {insertUser} from "../db/schema.ts";
 import {generateJwtToken, generateRefreshToken} from "../utils/tokens.ts";
 import {eq} from "drizzle-orm";
-import {stringToExpirationDate} from "../utils/datetime.ts";
-import env from "../../env.ts";
-import {redis} from "../db/redis.ts";
-import {authService} from "../services/authService.js";
-import {authRepo} from "../repository/authRepo.js";
-import {asyncHandler} from "../utils/asyncHandler.js";
+
 
 export const register = async (req: Request<any, any, insertUser>, res: Response) => {
     try {
-        const [hashedPassword, hashError] =  asyncHandler<string>(hashPassword(req.body.password));
+        const hashedPassword = await hashPassword(req.body.password);
         const [user] = await db.insert(users).values({
             ...req.body,
             password: hashedPassword
-        }).returning({
-            id: users.id,
-            email: users.email,
-            username: users.username,
-            createdAt: users.createdAt
-        })
+        }).returning(
+            {
+                id: users.id,
+                email: users.email,
+                username: users.username,
+                createdAt: users.createdAt
+            })
 
-        //signing in
-        const refreshToken = generateRefreshToken()
-        await redis.set(
-            `refresh:${refreshToken}`,
-            JSON.stringify({userId: user.id}),
-            "EX", env.REFRESH_EXPIRES_IN
-        );
-
-        await db.insert(sessionTokens).values({
-            deviceInfo: userAgent,
-            expiresAt: stringToExpirationDate(env.SESSION_EXPIRES_IN),
-            ip: userIp,
-            loginTime: new Date(),
-            refreshTokenHash: refreshToken,
-            userId: user.id
-        })
-        const token = await generateJwtToken({id: user.id, email: user.email, username: user.username})
         return res.status(201).json({
             message: 'User created successfully.',
             user,
-            accessToken: token,
-            refreshToken: refreshToken,
         })
+
     } catch (err) {
         console.log('Registration error', err)
         res.status(500).json({error: 'failed to create user'})
@@ -58,12 +36,8 @@ export const register = async (req: Request<any, any, insertUser>, res: Response
 export const login = async (req: Request<any, any, selectUser>, res: Response) => {
 
     try {
-
-        //check access token validation to prevent multiple logins from one device
-
-
         const [user] = await db.query.users.findMany({
-            where: eq(users.username, req.body.username),
+            where: eq(users.username, req.body.username) || eq(users.email, req.body.email),
         })
         if (!user) {
             return res.status(401).json({error: 'invalid credentials'})
@@ -73,22 +47,6 @@ export const login = async (req: Request<any, any, selectUser>, res: Response) =
         if (!isValidatedPassword) {
             return res.status(401).json({error: 'invalid credentials'})
         }
-
-        const refreshToken = generateRefreshToken()
-        await redis.set(
-            `refresh:${refreshToken}`,
-            JSON.stringify({userId: user.id}),
-            "EX", env.REFRESH_EXPIRES_IN
-        );
-
-        await authService.generateSession({
-            deviceInfo: userAgent,
-            expiresAt: stringToExpirationDate(env.SESSION_EXPIRES_IN),
-            ip: userIp,
-            loginTime: new Date(),
-            refreshTokenHash: refreshToken,
-            userId: user.id
-        })
 
 
         const token = await generateJwtToken({id: user.id, email: user.email, username: user.username})
@@ -101,8 +59,7 @@ export const login = async (req: Request<any, any, selectUser>, res: Response) =
                     username: user.username,
                     createdAt: user.createdAt,
                 },
-                accessToken: token,
-                refreshToken: refreshToken,
+                token,
             }
         )
     } catch (err) {
@@ -112,73 +69,6 @@ export const login = async (req: Request<any, any, selectUser>, res: Response) =
 
 }
 
-
-export const refreshToken = async (req: Request, res: Response) => {
-    //
-    // try {
-    //     const refreshToken = req.body.refreshToken;
-    //     if (!refreshToken) {
-    //         return res.status(401).json({error: 'Refresh token is required'});
-    //     }
-    //
-    //     const userData = await redis.get(`refresh:${refreshToken}`);
-    //     if (!userData) {
-    //         return res.status(401).json({error: 'Invalid refresh token'});
-    //     }
-    //
-    //     const {userId} = JSON.parse(userData);
-    //     const user = await db.query.users.findFirst({
-    //         where: eq(users.id, userId),
-    //     });
-    //
-    //     if (!user) {
-    //         return res.status(401).json({error: 'User not found'});
-    //     }
-    //
-    //     const userAgent = req.headers["user-agent"] || "unknown";
-    //     const userIp = (req.headers["x-forwarded-for"] as string)?.split(",")[0]
-    //         || req.socket.remoteAddress
-    //         || "unknown";
-    //
-    //     const newRefreshToken = generateRefreshToken();
-    //     await redis.set(
-    //         `refresh:${newRefreshToken}`,
-    //         JSON.stringify({userId: user.id}),
-    //         "EX", env.REFRESH_EXPIRES_IN
-    //     );
-    //
-    //     const sessionId = generateSessionSecret();
-    //     await db.insert(sessionTokens).values({
-    //         deviceInfo: userAgent,
-    //         expiresAt: stringToExpirationDate(env.SESSION_EXPIRES_IN),
-    //         ip: userIp,
-    //         loginTime: new Date(),
-    //         refreshTokenHash: newRefreshToken,
-    //         sessionId: sessionId,
-    //         userId: user.id
-    //     });
-    //
-    //     await redis.del(`refresh:${refreshToken}`);
-    //
-    //     const accessToken = await generateJwtToken({
-    //         id: user.id,
-    //         email: user.email,
-    //         username: user.username
-    //     });
-    //
-    //     return res.status(200).json({
-    //         message: 'Tokens refreshed successfully',
-    //         accessToken,
-    //         refreshToken: newRefreshToken
-    //     });
-    // } catch (err) {
-    //     console.log('Refresh token error', err)
-    //     res.status(500).json({error: 'failed to create refresh token'})
-    // }
-
-    res.status(200).json({message: 'tokens refreshed'})
-
-}
 
 export const logout = async (req: Request<any, any, selectUser>, res: Response) => {
     // try {
@@ -192,6 +82,43 @@ export const logout = async (req: Request<any, any, selectUser>, res: Response) 
     res.status(200).json({message: 'logged out'})
 }
 
+//
+// //signing in
+// const refreshToken = generateRefreshToken()
+// await redis.set(
+//     `refresh:${refreshToken}`,
+//     JSON.stringify({userId: user.id}),
+//     "EX", env.REFRESH_EXPIRES_IN
+// );
+//
+// await db.insert(sessionTokens).values({
+//     deviceInfo: userAgent,
+//     expiresAt: stringToExpirationDate(env.SESSION_EXPIRES_IN),
+//     ip: userIp,
+//     loginTime: new Date(),
+//     refreshTokenHash: refreshToken,
+//     userId: user.id
+// })
 
+
+// await authService.generateSession({
+//     deviceInfo: userAgent,
+//     expiresAt: stringToExpirationDate(env.SESSION_EXPIRES_IN),
+//     ip: userIp,
+//     loginTime: new Date(),
+//     refreshTokenHash: refreshToken,
+//     userId: user.id
+// })
+
+
+//logging in user on signup
+
+// const token = await generateJwtToken({id: user.id, email: user.email, username: user.username})
+// return res.status(201).json({
+//     message: 'User created successfully.',
+//     user,
+//     accessToken: token,
+//     refreshToken: refreshToken,
+// })
 
 

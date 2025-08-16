@@ -1,11 +1,12 @@
 import {Router} from 'express';
-import {getAllUsers, getUsersByUserName} from "../../controllers/userController.ts";
+import {addUserAssets, getUsersById, patchUserById} from "../../controllers/userController.ts";
 import {authenticateToken} from "../../middleware/auth.ts";
 
 const router = Router();
 
-router.get('/', authenticateToken, getAllUsers)
-
-router.get('/:id', authenticateToken, getUsersByUserName)
+router.use(authenticateToken)
+router.get('/', getUsersById)
+router.patch('/', patchUserById)
+router.post('/assets', addUserAssets)
 
 export default router;
