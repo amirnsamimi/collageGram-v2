@@ -6,7 +6,6 @@ export const bodyValidation = (schema: ZodSchema) => {
     return (req: Request, res: Response, next: NextFunction) => {
         try {
             req.body = schema.parse(req.body)
-
             next()
         } catch (err) {
             if (err instanceof ZodError) {

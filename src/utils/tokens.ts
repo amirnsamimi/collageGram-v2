@@ -1,4 +1,4 @@
-import {type JWTPayload, SignJWT} from "jose";
+import {type JWTPayload, jwtVerify, SignJWT} from "jose";
 import {createHash, createSecretKey, randomBytes} from "node:crypto";
 import env from "../../env.ts"
 
@@ -22,6 +22,12 @@ export const generateJwtToken = async (payload: JwtPayload): Promise<string> => 
         .sign(secretKey)
 }
 
+export const verifyJWTToken = async (token: string): Promise<JwtPayload> => {
+    const secretKey = createSecretKey(env.JWT_SECRET, "utf-8")
+    const {payload} = await jwtVerify(token, secretKey)
+    return payload as JwtPayload
+}
+
 // hash functions
 export const hashSha256Token = (token: string) => {
     return createHash("sha256").update(token).digest("hex");
@@ -33,10 +39,5 @@ export const createBase64urlToken = () => {
 
 // Refresh Token
 export const generateRefreshToken = (): string => {
-    return hashSha256Token(createBase64urlToken())
-}
-
-// Session
-export const generateSessionSecret = (): string => {
     return hashSha256Token(createBase64urlToken())
 }

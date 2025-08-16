@@ -24,17 +24,8 @@ export const users = pgTable('users', {
     updatedAt: timestamp('updated_at').defaultNow().notNull()
 })
 
-
-
-/**
- *
- *
- *
- *
- */
-
-export const sessionTokens = pgTable('session_tokens', {
-    sessionId: varchar("session_id", {length: 64}).primaryKey(),
+export const userSession = pgTable('user_session', {
+    id: uuid().primaryKey().defaultRandom(),
     userId: uuid('user_id')
         .references(() => users.id, {onDelete: 'cascade'})
         .notNull(),
@@ -48,9 +39,9 @@ export const sessionTokens = pgTable('session_tokens', {
 // ZOD Schemas
 export const selectUserSchema = createSelectSchema(users)
 export const insertUserSchema = createInsertSchema(users)
-export const insertSessionTokenSchema = createInsertSchema(sessionTokens)
+export const insertSessionTokenSchema = createInsertSchema(userSession)
 
 // Type Export
 export type selectUser = typeof users.$inferSelect
 export type insertUser = typeof users.$inferInsert
-export type insertSessionToken = typeof sessionTokens.$inferInsert
+export type insertUserSession = typeof userSession.$inferInsert

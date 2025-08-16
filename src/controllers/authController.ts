@@ -1,22 +1,20 @@
 import type {Request, Response} from 'express';
 import {comparePassword, hashPassword} from "../utils/passwords.ts";
 import {db} from "../db/connection.ts"
-import {type selectUser, sessionTokens, users} from "../db/schema.ts";
+import {type selectUser, users} from "../db/schema.ts";
 import type {insertUser} from "../db/schema.ts";
-import {generateJwtToken, generateRefreshToken, generateSessionSecret} from "../utils/tokens.ts";
+import {generateJwtToken, generateRefreshToken} from "../utils/tokens.ts";
 import {eq} from "drizzle-orm";
 import {stringToExpirationDate} from "../utils/datetime.ts";
 import env from "../../env.ts";
 import {redis} from "../db/redis.ts";
-import {isTypedArray} from "node:util/types";
+import {authService} from "../services/authService.js";
+import {authRepo} from "../repository/authRepo.js";
+import {asyncHandler} from "../utils/asyncHandler.js";
 
 export const register = async (req: Request<any, any, insertUser>, res: Response) => {
     try {
-        const userAgent = req.headers["user-agent"] || "unknown"
-        const userIp = (req.headers["x-forwarded-for"] as string)?.split(",")[0]
-            || req.socket.remoteAddress
-            || "unknown";
-        const hashedPassword = await hashPassword(req.body.password);
+        const [hashedPassword, hashError] =  asyncHandler<string>(hashPassword(req.body.password));
         const [user] = await db.insert(users).values({
             ...req.body,
             password: hashedPassword
@@ -27,7 +25,6 @@ export const register = async (req: Request<any, any, insertUser>, res: Response
             createdAt: users.createdAt
         })
 
-
         //signing in
         const refreshToken = generateRefreshToken()
         await redis.set(
@@ -36,14 +33,12 @@ export const register = async (req: Request<any, any, insertUser>, res: Response
             "EX", env.REFRESH_EXPIRES_IN
         );
 
-        const sessionId = generateSessionSecret()
         await db.insert(sessionTokens).values({
             deviceInfo: userAgent,
             expiresAt: stringToExpirationDate(env.SESSION_EXPIRES_IN),
             ip: userIp,
             loginTime: new Date(),
             refreshTokenHash: refreshToken,
-            sessionId: sessionId,
             userId: user.id
         })
         const token = await generateJwtToken({id: user.id, email: user.email, username: user.username})
@@ -53,7 +48,6 @@ export const register = async (req: Request<any, any, insertUser>, res: Response
             accessToken: token,
             refreshToken: refreshToken,
         })
-
     } catch (err) {
         console.log('Registration error', err)
         res.status(500).json({error: 'failed to create user'})
@@ -64,10 +58,9 @@ export const register = async (req: Request<any, any, insertUser>, res: Response
 export const login = async (req: Request<any, any, selectUser>, res: Response) => {
 
     try {
-        const userAgent = req.headers["user-agent"] || "unknown"
-        const userIp = (req.headers["x-forwarded-for"] as string)?.split(",")[0]
-            || req.socket.remoteAddress
-            || "unknown";
+
+        //check access token validation to prevent multiple logins from one device
+
 
         const [user] = await db.query.users.findMany({
             where: eq(users.username, req.body.username),
@@ -88,14 +81,12 @@ export const login = async (req: Request<any, any, selectUser>, res: Response) =
             "EX", env.REFRESH_EXPIRES_IN
         );
 
-        const sessionId = generateSessionSecret()
-        await db.insert(sessionTokens).values({
+        await authService.generateSession({
             deviceInfo: userAgent,
             expiresAt: stringToExpirationDate(env.SESSION_EXPIRES_IN),
             ip: userIp,
             loginTime: new Date(),
             refreshTokenHash: refreshToken,
-            sessionId: sessionId,
             userId: user.id
         })
 
@@ -120,6 +111,7 @@ export const login = async (req: Request<any, any, selectUser>, res: Response) =
     }
 
 }
+
 
 export const refreshToken = async (req: Request, res: Response) => {
     //

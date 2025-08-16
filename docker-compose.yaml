@@ -5,6 +5,7 @@ services:
     container_name: ${DATABASE_CONTAINER_NAME}
     environment:
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_CONTAINER_NAME}
     ports:
       - "5432:5432"
     restart: unless-stopped

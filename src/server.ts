@@ -5,6 +5,7 @@ import healthRoutes from "./routes/health.routes.ts";
 import authRoutes from "./routes/v1/auth.routes.ts";
 import swaggerUi from "swagger-ui-express"
 import YAML from "yamljs"
+import userRoutes from "./routes/v1/user.routes.ts";
 
 const app = express();
 
@@ -18,8 +19,9 @@ const swaggerDocument = YAML.load("./docs/swagger.yaml");
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 /* ---- ROUTES ---- */
-app.use("/health", healthRoutes)
+app.use("/api/health", healthRoutes)
 app.use("/api/auth", authRoutes)
+app.use("/api/users", userRoutes)
 
 export {app}
 export default app

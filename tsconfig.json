@@ -4,10 +4,11 @@
     "target": "esnext",
     "module": "NodeNext",
     "rewriteRelativeImportExtensions": true,
-    "erasableSyntaxOnly": true,
+    "erasableSyntaxOnly": false,
     "verbatimModuleSyntax": true,
     "allowImportingTsExtensions": true,
-
-    "types": ["vitest/globals"]
+    "types": [
+      "vitest/globals"
+    ]
   }
 }

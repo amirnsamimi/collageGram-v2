@@ -1,5 +1,5 @@
 ### HEALTH CHECK
-GET http://localhost:3001/health
+GET http://localhost:3001/api/health
 
 ### REGISTER USER
 POST http://localhost:3001/api/auth/register
@@ -19,3 +19,8 @@ Content-Type: application/json
   "username": "amirns",
   "password": "amir1995@!"
 }
+
+### CHECK AUTHORIZATION
+GET http://localhost:3001/api/users
+Content-Type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiJ9.eyJpZCI6IjdmM2VmOTdkLTk4ODUtNGM5Yi05ZTU2LTAzNGMxYTFlMjZhNSIsImVtYWlsIjoiYW1yaW5zYW1pbWlAZ21haWwuY29tIiwidXNlcm5hbWUiOiJhbWlybnMiLCJpYXQiOjE3NTUzMzU0MTksImV4cCI6MTc1NTMzNzIxOX0.NKWMJUzuGOL80jHE2Iecun9C4t0NrPGqrLsOsU5t4y8
