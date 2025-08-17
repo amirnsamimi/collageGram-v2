@@ -2,7 +2,7 @@ import type {Request, Response} from "express";
 import {type insertUser, type selectUser, userAssets, users} from "../db/schema.ts";
 import db from "../db/connection.ts";
 import {eq} from "drizzle-orm"
-import type {AuthenticatedRequest} from "../middleware/auth.js";
+import type {AuthenticatedRequest} from "../middleware/auth.ts";
 
 // export const getAllUsers = async (req: AuthenticatedRequest, res: Response) => {
 //     try {

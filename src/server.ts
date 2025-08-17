@@ -6,6 +6,7 @@ import authRoutes from "./routes/v1/auth.routes.ts";
 import swaggerUi from "swagger-ui-express"
 import YAML from "yamljs"
 import userRoutes from "./routes/v1/user.routes.ts";
+import {errorHandler} from "./middleware/errorHandler.ts";
 
 const app = express();
 
@@ -13,6 +14,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(helmet())
 app.use(cors())
+
 
 /* ---- DOCS ---- */
 const swaggerDocument = YAML.load("./docs/swagger.yaml");
@@ -22,6 +24,9 @@ app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 app.use("/api/health", healthRoutes)
 app.use("/api/auth", authRoutes)
 app.use("/api/users", userRoutes)
+
+/* ---- ERROR HANDLING --- */
+app.use(errorHandler)
 
 export {app}
 export default app

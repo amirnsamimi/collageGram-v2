@@ -1,5 +1,5 @@
-import {authRepo} from "../repository/authRepo.js";
-import type {insertUserSession} from "../db/schema.js";
+import {authRepo} from "../repository/authRepo.ts";
+
 import type {Request} from "express";
 
 export class authService {
@@ -17,20 +17,5 @@ export class authService {
         return (req.headers["x-forwarded-for"] as string)?.split(",")[0] || req.socket.remoteAddress || "unknown"
     }
 
-
-    static async generateSession(payload: insertUserSession) {
-
-        try {
-            await authRepo.insertOneUserSession({
-                ...payload
-            })
-
-        } catch (err) {
-            console.log('Session Generating Error', err)
-            throw new Error('Session Generating Error')
-        }
-
-
-    }
 
 }
