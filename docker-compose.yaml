@@ -10,6 +10,17 @@ services:
       - "5432:5432"
     restart: unless-stopped
 
+  collagegram-test:
+    image: postgres:latest
+    container_name: ${DATABASE_TEST_CONTAINER_NAME}
+    environment:
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_TEST_CONTAINER_NAME}
+    ports:
+      - "5433:5432"
+    restart: unless-stopped
+
+
   redis:
     image: redis:latest
     container_name: ${REDIS_CONTAINER_NAME}

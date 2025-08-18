@@ -9,10 +9,9 @@ const isProduction = process.env.APP_STAGE === 'production'
 const isDevelopment = process.env.APP_STAGE === 'dev'
 const isTest = process.env.APP_STAGE === 'test'
 
+
 if (isDevelopment) {
-    loadEnv(".env.dev")
-} else if (isProduction) {
-    loadEnv(".env")
+    loadEnv()
 } else if (isTest) {
     loadEnv(".env.test")
 }
@@ -22,6 +21,7 @@ const envSchema = z.object({
     NODE_ENV: z.enum(['production', 'development', 'test']).default('development'),
     APP_STAGE: z.enum(['dev', 'production', 'test']).default('dev'),
     PORT: z.coerce.number().positive().default(3001),
+    CORS_ORIGIN: z.string().startsWith("http://"),
 
     BCRYPT_ROUNDS: z.coerce.number().default(12),
     JWT_SECRET: z.string().default('secret'),
