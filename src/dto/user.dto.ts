@@ -1,3 +1,3 @@
-import {insertUserAssetsSchema} from "../db/schema.js";
+// import {insertUserAssetsSchema} from "../db/schema.js";
 
 // const userAssets = insertUserAssetsSchema.extend()

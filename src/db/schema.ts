@@ -19,35 +19,35 @@ export const users = pgTable('users', {
     email: varchar('email', {length: 255}).notNull().unique(),
     username: varchar('username', {length: 255}).notNull().unique(),
     password: varchar('password', {length: 255}).notNull(),
-    firstName: varchar('first_name', {length: 255}),
-    lastName: varchar('last_name', {length: 255}),
+    firstName: varchar('first_name', {length: 255}).default(null),
+    lastName: varchar('last_name', {length: 255}).default(null),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull()
 })
 
-export const userAssets = pgTable('userAssets', {
-    id: uuid().primaryKey().defaultRandom(),
-    userId: uuid('user_id')
-        .references(() => users.id, {onDelete: 'cascade'})
-        .notNull(),
-    name: varchar('name', {length: 255}).notNull(),
-    description: text('description'),
-    type: varchar('type', {length: 255}).notNull(),
-    url: varchar('url', {length: 255}).notNull(),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at').defaultNow().notNull()
-})
+// export const userAssets = pgTable('userAssets', {
+//     id: uuid().primaryKey().defaultRandom(),
+//     userId: uuid('user_id')
+//         .references(() => users.id, {onDelete: 'cascade'})
+//         .notNull(),
+//     name: varchar('name', {length: 255}).notNull(),
+//     description: text('description'),
+//     type: varchar('type', {length: 255}).notNull(),
+//     url: varchar('url', {length: 255}).notNull(),
+//     createdAt: timestamp('created_at').defaultNow().notNull(),
+//     updatedAt: timestamp('updated_at').defaultNow().notNull()
+// })
 
 
 // ZOD Schemas
 export const selectUserSchema = createSelectSchema(users)
 export const insertUserSchema = createInsertSchema(users)
-export const selectUserAssetsSchema = createSelectSchema(userAssets)
-export const insertUserAssetsSchema = createInsertSchema(userAssets)
+// export const selectUserAssetsSchema = createSelectSchema(userAssets)
+// export const insertUserAssetsSchema = createInsertSchema(userAssets)
 
 
 // Type Export
 export type selectUser = typeof users.$inferSelect
 export type insertUser = typeof users.$inferInsert
-export type selectUserAssets = typeof userAssets.$inferSelect
-export type insertUserAssets = typeof userAssets.$inferInsert
+// export type selectUserAssets = typeof userAssets.$inferSelect
+// export type insertUserAssets = typeof userAssets.$inferInsert

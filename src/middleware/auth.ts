@@ -11,7 +11,7 @@ export const authenticateToken = async (req: AuthenticatedRequest, res: Response
         const token = authHeader && authHeader.split(' ')[1]
 
         if (!token) {
-            return res.status(401).json({error: 'bad request'})
+            return res.status(401).json({error: 'Unauthorized'})
         }
         req.user = await verifyJWTToken(token)
         next()

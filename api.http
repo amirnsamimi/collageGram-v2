@@ -2,25 +2,25 @@
 GET http://localhost:3001/api/health
 
 ### REGISTER USER
-POST http://localhost:3001/api/auth/register
+POST http://localhost:3001/api/v1/auth/register
 Content-Type: application/json
 
 {
-  "username": "test45-1",
-  "password": "tesAt1@123",
-  "email": "test@6ser.com"
+  "username": "test123",
+  "password": "test123@T",
+  "email": "test3@user.com"
 }
 
 ### LOGIN USER
-POST http://localhost:3001/api/auth/login
+POST http://localhost:3001/api/v1/auth/login
 Content-Type: application/json
 
 {
-  "username": "test45-1",
-  "password": "tesAt1@123"
+  "username": "test123",
+  "password": "test123@T"
 }
 
 ### CHECK AUTHORIZATION
-GET http://localhost:3001/api/users
+GET http://localhost:3001/api/v1/users
 Content-Type: application/json
 Authorization: bearer eyJhbGciOiJIUzI1NiJ9.eyJpZCI6IjA0YmExOGQ5LTc0YmYtNGFiOC05ZWI2LWJiM2VhOWMwZGRjZCIsImVtYWlsIjoidGVzdEA2c2VyLmNvbSIsInVzZXJuYW1lIjoidGVzdDQ1LTEiLCJpYXQiOjE3NTU0Mzc4MDYsImV4cCI6MTc1NTQzOTYwNn0.5rrZMu6OusnAsHYLunAvAEwsX5C7Hsv1M-uditcmdnA

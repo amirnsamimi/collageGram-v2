@@ -7,8 +7,12 @@
     "erasableSyntaxOnly": false,
     "verbatimModuleSyntax": true,
     "allowImportingTsExtensions": true,
+    "skipLibCheck": true,
     "types": [
       "vitest/globals"
     ]
-  }
+  },
+  "include": [
+    "src"
+  ]
 }

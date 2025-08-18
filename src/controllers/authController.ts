@@ -37,7 +37,7 @@ export const login = async (req: Request<any, any, selectUser>, res: Response) =
 
     try {
         const [user] = await db.query.users.findMany({
-            where: eq(users.username, req.body.username) || eq(users.email, req.body.email),
+            where: eq(users.username, req.body.username)
         })
         if (!user) {
             return res.status(401).json({error: 'invalid credentials'})

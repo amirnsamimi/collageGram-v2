@@ -1,5 +1,5 @@
-import {db} from "../src/db/connection.ts"
-import {users} from "../src/db/schema.js"
+import {db} from "../../src/db/connection.ts"
+import {users} from "../../src/db/schema.js"
 import {sql} from "drizzle-orm"
 import {execSync} from 'node:child_process' //running bash commands
 

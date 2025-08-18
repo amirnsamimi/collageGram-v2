@@ -1,5 +1,5 @@
 import type {Request, Response} from "express";
-import {type insertUser, type selectUser, userAssets, users} from "../db/schema.ts";
+import {type insertUser, type selectUser, users} from "../db/schema.ts";
 import db from "../db/connection.ts";
 import {eq} from "drizzle-orm"
 import type {AuthenticatedRequest} from "../middleware/auth.ts";
@@ -45,44 +45,44 @@ export const patchUserById = async (req: AuthenticatedRequest, res: Response) =>
     }
 }
 
-export const addUserAssets = async (req: AuthenticatedRequest, res: Response) => {
-    try {
-        const files = req.files as Express.MulterS3.File[];
-        if (!files || files.length === 0) {
-            console.log('No files uploaded')
-            process.exit(1)
-        }
-
-        await db.transaction(async (tx) => {
-            for (const file of files) {
-                await tx.insert(userAssets).values({
-                    userId: req.user.id,
-                    name: file.originalname,
-                    type: file.mimetype,
-                    url: file.location,
-
-                });
-            }
-        });
-
-        // Respond with all uploaded file info
-        const uploadedFiles = files.map(f => ({
-            size: f.size,
-            url: f.location,
-            name: f.key,
-            type: f.mimetype,
-        }));
-
-        res.send({
-            status: 'success',
-            message: `${files.length} files uploaded!`,
-            files: uploadedFiles,
-        });
-    } catch (err: any) {
-        console.error(err);
-        res.status(500).send({status: 'error', message: err.message});
-    }
-}
+// export const addUserAssets = async (req: AuthenticatedRequest, res: Response) => {
+//     try {
+//         const files = req.files as Express.MulterS3.File[];
+//         if (!files || files.length === 0) {
+//             console.log('No files uploaded')
+//             process.exit(1)
+//         }
+//
+//         await db.transaction(async (tx) => {
+//             for (const file of files) {
+//                 await tx.insert(user_assets).values({
+//                     user_id: req.user.id,
+//                     name: file.originalname,
+//                     type: file.mimetype,
+//                     url: file.location,
+//
+//                 });
+//             }
+//         });
+//
+//         // Respond with all uploaded file info
+//         const uploadedFiles = files.map(f => ({
+//             size: f.size,
+//             url: f.location,
+//             name: f.key,
+//             type: f.mimetype,
+//         }));
+//
+//         res.send({
+//             status: 'success',
+//             message: `${files.length} files uploaded!`,
+//             files: uploadedFiles,
+//         });
+//     } catch (err: any) {
+//         console.error(err);
+//         res.status(500).send({status: 'error', message: err.message});
+//     }
+// }
 //
 // export const addUserProfilePic = async (req: AuthenticatedRequest, res: Response) => {
 //     try {
